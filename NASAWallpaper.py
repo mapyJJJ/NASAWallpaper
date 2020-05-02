@@ -1,5 +1,7 @@
 import re
 import os
+import sys
+import time
 import random
 import requests
 from datetime import datetime
@@ -12,7 +14,16 @@ headers = {
 
 class SETWallpaper:
     def __init__(self) -> None:
-        self.images = [m for m in os.listdir(image_dir) if m.split('.')[1] in ["jpg","png"]]
+        image_list = [m for m in os.listdir(image_dir) if m.split('.')[1] in ["jpg","png"]]
+        today_date = datetime.strftime(datetime.now(), '%Y-%m-%d')
+        images = []
+        for image in image_list:
+            date = '-'.join(image.split("-")[1:4])
+            if date != today_date:
+                os.remove(os.path.join(image_dir, image))
+                continue
+            images.append(image)
+        self.images = images
     def _judge_env(self) -> str:
         desk_env = os.getenv("DESKTOP_SESSION")
         if "gnome" in desk_env:
@@ -27,18 +38,20 @@ class SETWallpaper:
         """
         # judge desktop env
         desk_env = self._judge_env()
+        last_images = []
         try:
             with open(os.path.join(wallpaper_log_dir, "run.log"), 'r') as f:
                 lines = f.readlines()
-                last_image = lines[-1].split(">")[1].strip()
+                for line in lines[-9:]:
+                    last_images.append(line.split(">")[1].strip())
             if len(lines) > 100:
                 # remove log file
                 os.remove(os.path.join(wallpaper_log_dir, "run.log"))
         except:
-            last_image = ''
+            pass
         while True:
             image = random.choice(self.images)
-            if image != last_image or not last_image:
+            if image not in last_images or not last_images:
                 break
         image_path = os.path.join(image_dir, image)
         # set wallpaper
@@ -98,6 +111,12 @@ class RecordLog:
             f.write(f"{datetime.now()} set>{image}\n")
 
 if __name__ == "__main__":
-    NASAWallpaper()._main()
-    image = SETWallpaper()._set()
-    RecordLog(image)._record()
+    try:
+        cicle_time = float(sys.argv[1])
+    except:
+        sys.exit(0)
+    while True:
+        NASAWallpaper()._main()
+        image = SETWallpaper()._set()
+        RecordLog(image)._record()
+        time.sleep(int(cicle_time*60))
