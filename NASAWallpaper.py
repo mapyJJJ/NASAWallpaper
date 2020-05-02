@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import re
 import os
 import sys
@@ -5,6 +6,8 @@ import time
 import random
 import requests
 from datetime import datetime
+
+from os import write
 
 image_dir = "/home/NASAWallpapers/images"
 wallpaper_log_dir = "/home/NASAWallpapers/"
@@ -110,13 +113,13 @@ class RecordLog:
         with open(os.path.join(self.wallpaper_log_path, "run.log"), 'a') as f:
             f.write(f"{datetime.now()} set>{image}\n")
 
-if __name__ == "__main__":
-    try:
-        cicle_time = float(sys.argv[1])
-    except:
-        sys.exit(0)
+os.environ["PATH"] += f':{str(os.getcwd())}'
+try:
+    cicle_time = int(sys.argv[1])
     while True:
         NASAWallpaper()._main()
         image = SETWallpaper()._set()
         RecordLog(image)._record()
-        time.sleep(int(cicle_time*60))
+        time.sleep(cicle_time)
+except Exception as e:
+    sys.exit(0)
