@@ -4,7 +4,7 @@
 ### 目前支持的Linux桌面环境:
 
 **gnome**
-**预计适配xfce**
+**预计适配xfce, KDE**
 
 
 #### 前提环境配置: python3
